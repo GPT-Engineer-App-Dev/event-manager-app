@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Heading, Button, Flex, Text, Input, Textarea, FormControl, FormLabel } from "@chakra-ui/react";
 import { FaPlus, FaEdit } from "react-icons/fa";
 
@@ -7,13 +7,13 @@ const HomePage = ({ events, onAddEvent, onEditEvent }) => (
     <Heading as="h1" mb={4}>
       Events
     </Heading>
-    {events.map((event, index) => (
-      <Box key={index} p={4} borderWidth={1} mb={4}>
+    {events.map((event) => (
+      <Box key={event.id} p={4} borderWidth={1} mb={4}>
         <Heading as="h2" size="md">
-          {event.title}
+          {event.attributes.name}
         </Heading>
-        <Text>{event.description}</Text>
-        <Button leftIcon={<FaEdit />} size="sm" onClick={() => onEditEvent(index)}>
+        <Text>{event.attributes.description}</Text>
+        <Button leftIcon={<FaEdit />} size="sm" onClick={() => onEditEvent(event.id)}>
           Edit
         </Button>
       </Box>
@@ -77,6 +77,20 @@ const EditEventPage = ({ event, onSave }) => {
 
 const Index = () => {
   const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch("http://localhost:1337/api/events");
+        const data = await response.json();
+        setEvents(data.data);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedEventIndex, setSelectedEventIndex] = useState(null);
 
