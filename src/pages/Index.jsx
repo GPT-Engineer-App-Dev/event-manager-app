@@ -21,7 +21,9 @@ const HomePage = ({ events, onAddEvent, onEditEvent }) => (
   </Box>
 );
 
-const CreateEventPage = ({ title, description, onTitleChange, onDescriptionChange, onSave }) => {
+const CreateEventPage = ({ onSave }) => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const handleSubmit = () => {
     onSave();
   };
@@ -80,7 +82,7 @@ const Index = () => {
       try {
         const response = await fetch("http://localhost:1337/api/events");
         const data = await response.json();
-        setEvents(data.data);
+        setEvents(data.data || []);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
@@ -107,8 +109,8 @@ const Index = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setEvents([...events, data.data]);
+        const newEvent = await response.json();
+        setEvents((prevEvents) => [...prevEvents, newEvent.data]);
         setCurrentPage("home");
         setTitle("");
         setDescription("");
@@ -136,15 +138,7 @@ const Index = () => {
   if (currentPage === "home") {
     page = <HomePage events={events} onAddEvent={() => setCurrentPage("create")} onEditEvent={handleEditEvent} />;
   } else if (currentPage === "create") {
-    page = (
-      <CreateEventPage
-        title={title}
-        description={description}
-        onTitleChange={(e) => setTitle(e.target.value)}
-        onDescriptionChange={(e) => setDescription(e.target.value)}
-        onSave={handleSubmit}
-      />
-    );
+    page = <CreateEventPage title={title} description={description} onTitleChange={(e) => setTitle(e.target.value)} onDescriptionChange={(e) => setDescription(e.target.value)} onSave={handleSubmit} />;
   } else if (currentPage === "edit") {
     page = <EditEventPage event={events[selectedEventIndex]} onSave={handleUpdateEvent} />;
   }
