@@ -21,14 +21,9 @@ const HomePage = ({ events, onAddEvent, onEditEvent }) => (
   </Box>
 );
 
-const CreateEventPage = ({ onSave }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-
+const CreateEventPage = ({ title, description, onTitleChange, onDescriptionChange, onSave }) => {
   const handleSubmit = () => {
-    onSave({ title, description });
-    setTitle("");
-    setDescription("");
+    onSave();
   };
 
   return (
@@ -77,6 +72,8 @@ const EditEventPage = ({ event, onSave }) => {
 
 const Index = () => {
   const [events, setEvents] = useState([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -94,9 +91,33 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedEventIndex, setSelectedEventIndex] = useState(null);
 
-  const handleAddEvent = (newEvent) => {
-    setEvents([...events, newEvent]);
-    setCurrentPage("home");
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:1337/api/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: {
+            name: title,
+            description: description,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEvents([...events, data.data]);
+        setCurrentPage("home");
+        setTitle("");
+        setDescription("");
+      } else {
+        console.error("Error creating event:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+    }
   };
 
   const handleEditEvent = (index) => {
@@ -115,7 +136,15 @@ const Index = () => {
   if (currentPage === "home") {
     page = <HomePage events={events} onAddEvent={() => setCurrentPage("create")} onEditEvent={handleEditEvent} />;
   } else if (currentPage === "create") {
-    page = <CreateEventPage onSave={handleAddEvent} />;
+    page = (
+      <CreateEventPage
+        title={title}
+        description={description}
+        onTitleChange={(e) => setTitle(e.target.value)}
+        onDescriptionChange={(e) => setDescription(e.target.value)}
+        onSave={handleSubmit}
+      />
+    );
   } else if (currentPage === "edit") {
     page = <EditEventPage event={events[selectedEventIndex]} onSave={handleUpdateEvent} />;
   }
