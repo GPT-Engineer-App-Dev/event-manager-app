@@ -2,24 +2,30 @@ import React, { useState, useEffect } from "react";
 import { Box, Heading, Button, Flex, Text, Input, Textarea, FormControl, FormLabel } from "@chakra-ui/react";
 import { FaPlus, FaEdit } from "react-icons/fa";
 
-const HomePage = ({ events, onAddEvent, onEditEvent }) => (
-  <Box>
-    <Heading as="h1" mb={4}>
-      Events
-    </Heading>
-    {events.map((event) => (
-      <Box key={event.id} p={4} borderWidth={1} mb={4}>
-        <Heading as="h2" size="md">
-          {event.attributes.name}
-        </Heading>
-        <Text>{event.attributes.description}</Text>
-        <Button leftIcon={<FaEdit />} size="sm" onClick={() => onEditEvent(event.id)}>
-          Edit
-        </Button>
-      </Box>
-    ))}
-  </Box>
-);
+import { useNavigate } from "react-router-dom";
+
+const HomePage = ({ events, onAddEvent }) => {
+  const navigate = useNavigate();
+
+  return (
+    <Box>
+      <Heading as="h1" mb={4}>
+        Events
+      </Heading>
+      {events.map((event) => (
+        <Box key={event.id} p={4} borderWidth={1} mb={4}>
+          <Heading as="h2" size="md">
+            {event.attributes.name}
+          </Heading>
+          <Text>{event.attributes.description}</Text>
+          <Button leftIcon={<FaEdit />} size="sm" onClick={() => navigate(`/edit/${event.id}`)}>
+            Edit
+          </Button>
+        </Box>
+      ))}
+    </Box>
+  );
+};
 
 const CreateEventPage = ({ onSave }) => {
   const [title, setTitle] = useState("");
